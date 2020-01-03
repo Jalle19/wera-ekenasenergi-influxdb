@@ -60,15 +60,14 @@ $ch = curl_init('https://wera.ekenasenergi.fi/Reporting/CustomerConsumption/GetH
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieJarPath);
 curl_setopt($ch, CURLOPT_POST, 1);
-$value = http_build_query([
+curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
     'customerCode' => $options['customerCode'],
     'networkCode' => $options['networkCode'],
     'meteringPointCode' => $options['meteringPointCode'],
     'enableTemperature' => 'true',
     'enablePriceSeries' => 'true',
     'enableTemperatureCorrectedConsumption' => 'true',
-]);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $value);
+]));
 $consumptionJson = curl_exec($ch);
 
 // Pretty print the output
