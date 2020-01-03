@@ -7,7 +7,7 @@ A tool for parsing electricity consumption data from Ekenäs Energi's Wera servi
 This project comes with two tools:
 
 * `dump-json` simply performs the authentication dance and dumps the complete JSON consumption data to stdout
-* TODO: Tool for importing the JSON to InfluxDB
+* `influxdb-import` imports the JSON to InfluxDB
 
 ### dump-json
 
