@@ -17,6 +17,12 @@ This project comes with two tools:
 * `dump-json` simply performs the authentication dance and dumps the complete JSON consumption data to stdout
 * `influxdb-import` imports the JSON to InfluxDB
 
+You'll need PHP with cURL support installed:
+
+```bash
+sudo apt-get install php-cli php-curl
+```
+
 ### dump-json
 
 You'll need to access the Wera online service and check what requests your browser is sending in order to get the 
@@ -56,6 +62,8 @@ php influxdb-import.php
   --influxDbPassword <influxDbPassword>
   < <jsonFile>
 ```
+
+Naturally you can chain both commands together to both fetch the data and send it to InfluxDB in one go.
 
 ## License
 
