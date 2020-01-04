@@ -64,14 +64,11 @@ $queries = array_merge($queries, array_map(static function (array $dataPoint) {
 }, $temperature));
 
 // Write all the data points in one go to InfluxDB
-// Write the measurements to InfluxDB
-$combinedQuery = implode("\n", $queries);
-
 $writeContext = stream_context_create([
     'http' => [
         'method' => 'POST',
         'header' => 'Content-Type: text/plain',
-        'content' => $combinedQuery,
+        'content' => implode("\n", $queries),
     ],
 ]);
 
