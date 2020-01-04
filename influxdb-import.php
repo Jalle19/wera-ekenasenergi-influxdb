@@ -23,6 +23,13 @@ OPTS;
     die('Usage: ' . $argv[0] . $usageOptionsString . " \n");
 }
 
+function createInfluxDbAuthorizationHeader($options): string
+{
+    $encoded = base64_encode(sprintf('%s:%s', $options['influxDbUsername'], $options['influxDbPassword']));
+
+    return sprintf('Authorization: Basic %s', $encoded);
+}
+
 // Read the JSON from stdin
 $json = file_get_contents('php://stdin');
 $data = json_decode($json, true);
@@ -55,8 +62,14 @@ $consumptions = extractFilteredDataSeries($data['Consumptions'][0]['Series']['Da
 $temperature = extractFilteredDataSeries($data['Temperature']['Data']);
 
 // Check if the specified InfluxDB database exists
+$databaseExistsContext = stream_context_create([
+    'http' => [
+        'header' => createInfluxDbAuthorizationHeader($options),
+    ],
+]);
+
 $databaseExistsRequestUrl = sprintf('%s/query?q=%s', rtrim($options['influxDbUrl'], '/'), urlencode('SHOW DATABASES'));
-$databaseExistsResponse = @file_get_contents($databaseExistsRequestUrl);
+$databaseExistsResponse = @file_get_contents($databaseExistsRequestUrl, false, $databaseExistsContext);
 
 if ($databaseExistsResponse === false) {
     throw new RuntimeException('Failed to query list of databases from InfluxDb');
@@ -65,7 +78,7 @@ if ($databaseExistsResponse === false) {
 $databaseExistsDecodedResponse = json_decode($databaseExistsResponse, true);
 $availableDatabases = array_map(static function ($value) {
     return $value[0];
-}, $databaseExistsDecodedResponse['results'][0]['series'][0]['values']);
+}, $databaseExistsDecodedResponse['results'][0]['series'][0]['values'] ?? []);
 
 if (!in_array($options['influxDbName'], $availableDatabases, true)) {
     throw new RuntimeException(sprintf('The specified database "%s" does not exist in InfluxDb',
@@ -85,7 +98,10 @@ $queries = array_merge($queries, array_map(static function (array $dataPoint) {
 $writeContext = stream_context_create([
     'http' => [
         'method' => 'POST',
-        'header' => 'Content-Type: text/plain',
+        'header' => [
+            'Authorization' => createInfluxDbAuthorizationHeader($options),
+            'Content-Type: text/plain',
+        ],
         'content' => implode("\n", $queries),
     ],
 ]);
