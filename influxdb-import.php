@@ -54,6 +54,24 @@ function extractFilteredDataSeries(array $data)
 $consumptions = extractFilteredDataSeries($data['Consumptions'][0]['Series']['Data']);
 $temperature = extractFilteredDataSeries($data['Temperature']['Data']);
 
+// Check if the specified InfluxDB database exists
+$databaseExistsRequestUrl = sprintf('%s/query?q=%s', rtrim($options['influxDbUrl'], '/'), urlencode('SHOW DATABASES'));
+$databaseExistsResponse = @file_get_contents($databaseExistsRequestUrl);
+
+if ($databaseExistsResponse === false) {
+    throw new RuntimeException('Failed to query list of databases from InfluxDb');
+}
+
+$databaseExistsDecodedResponse = json_decode($databaseExistsResponse, true);
+$availableDatabases = array_map(static function ($value) {
+    return $value[0];
+}, $databaseExistsDecodedResponse['results'][0]['series'][0]['values']);
+
+if (!in_array($options['influxDbName'], $availableDatabases, true)) {
+    throw new RuntimeException(sprintf('The specified database "%s" does not exist in InfluxDb',
+        $options['influxDbName']));
+}
+
 // Generate InfluxDB queries
 $queries = array_map(static function (array $dataPoint) {
     return sprintf('Consumptions PowerConsumption=%f %d', $dataPoint[1], $dataPoint[0]);
