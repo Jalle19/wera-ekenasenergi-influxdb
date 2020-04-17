@@ -28,7 +28,7 @@ OPTS;
 $cookieJarPath = tempnam(sys_get_temp_dir(), 'wera-ekenasenergi-influxdb');
 
 // Perform a GET request to the IndexNoAuth page and extract the hidden __RequestVerificationToken form value
-$ch = curl_init('https://wera.ekenasenergi.fi/eServices/Online/IndexNoAuth');
+$ch = curl_init('https://wera.re.fi/eServices/Online/IndexNoAuth');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_COOKIEJAR, $cookieJarPath);
 $loginPageHtml = curl_exec($ch);
@@ -44,7 +44,7 @@ if ($hiddenInputField === false || $hiddenInputField->count() !== 1) {
 $requestVerificationToken = $hiddenInputField->item(0)->getAttribute('value');
 
 // Now that we have a session we can perform a POST to Login to authenticate ourselves
-$ch = curl_init('https://wera.ekenasenergi.fi/eServices/Online/Login');
+$ch = curl_init('https://wera.re.fi/eServices/Online/Login');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieJarPath);
 curl_setopt($ch, CURLOPT_POST, 1);
@@ -56,7 +56,7 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
 curl_exec($ch);
 
 // Now that we're authenticated we can get the actual measurement data
-$ch = curl_init('https://wera.ekenasenergi.fi/Reporting/CustomerConsumption/GetHourlyConsumption');
+$ch = curl_init('https://wera.re.fi/Reporting/CustomerConsumption/GetHourlyConsumption');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieJarPath);
 curl_setopt($ch, CURLOPT_POST, 1);
